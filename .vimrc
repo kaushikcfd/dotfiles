@@ -22,4 +22,5 @@ set background=dark
 set number
 set showmatch
 set comments=sl:/*,mb:\ *,elx:\ */
+let delimitMate_expand_cr = 1
 let g:ycm_global_ycm_extra_conf = "~/.vim/.ycm_extra_conf.py"
