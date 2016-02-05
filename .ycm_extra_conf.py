@@ -26,6 +26,8 @@ flags = [
     '-stdlib=libc++',
     '-x',
     'c++',
+    '-I','/home/kaushikcfd/MyStuff/ClonedRepos/petsc/include',
+    '-I','/home/kaushikcfd/MyStuff/ClonedRepos/petsc/linux-gnu-c-debug/include'
     '-I',
     '.',
 ]
