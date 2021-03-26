@@ -2,93 +2,76 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 
-;; Set by some plugin
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(ansi-color-names-vector
-   ["black" "#d55e00" "#009e73" "#f8ec59" "#0072b2" "#cc79a7" "#56b4e9" "white"])
- '(custom-enabled-themes (quote (light-blue)))
- '(org-agenda-files
-   (quote
-    ("~/Dropbox/Courses/F18/CS556/homeworks/project/numerics_review.org"))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;; If there are no archived package contents, refresh them
+(when (not package-archive-contents)
+  (package-refresh-contents))
 
-;; Setting line numbers
-(global-linum-mode t)
 
-;; Word wrap options
+;; Installs packages
+;;
+;; myPackages contains a list of package names
+(defvar myPackages
+  '(better-defaults                 ;; Set up some better Emacs defaults
+    nord-theme                      ;; Theme
+    evil                            ;; vim key-bindings
+    elpy                            ;; Emacs lisp python environment
+    flycheck                        ;; On the fly syntax checking
+    magit                           ;; Git integration
+    org-journal                     ;; Org-journalling
+    )
+  )
+
+;; Scans the list in myPackages
+;; If the package listed is not already installed, install it
+(mapc #'(lambda (package)
+          (unless (package-installed-p package)
+            (package-install package)))
+      myPackages)
+
+
+;; ===================================
+;; Basic Customization
+;; ===================================
+(setq inhibit-startup-message t)                            ;; org-journal-new-netry as the startup screen
+(require 'org-journal)
+(org-journal-open-current-journal-file)
+(delete-other-windows)
+(load-theme 'nord t)                                        ;; Load Nord theme
+(global-linum-mode t)                                       ;; enable line numbers globally
+
+
+;; Hard word wrapping
 (global-visual-line-mode t)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
-(add-hook 'text-mode-hook
-  '(lambda() (set-fill-column 80)))
+(add-hook 'text-mode-hook '(lambda() (set-fill-column 85))) ;; word wrap column=85
 
 ;; Spell Check
 (dolist (hook '(text-mode-hook))
   (add-hook hook (lambda () (flyspell-mode 1))))
 
-;; Org mode options
-(require 'org)
-(define-key global-map "\C-cl" 'org-store-link)
-(define-key global-map "\C-ca" 'org-agenda)
-(setq org-log-done t)
-(add-hook 'org-mode-hook #'toggle-word-wrap)
-(add-hook 'org-mode-hook 'flyspell-mode)
-
-;; Org mode latex preferences
-(require 'ox-latex)
-(require 'ox-beamer)
-(require 'org-ref)
-(setq org-latex-listings 'minted
-      org-latex-packages-alist '(("" "minted")))
-(setq org-latex-pdf-process (list "latexmk -shell-escape -bibtex -f -pdf %f && latexmk -c"))
-(setq org-latex-caption-above nil)
-
-(add-to-list 'org-latex-classes
-            `("beamer"
-              ,(concat "\\documentclass[presentation]{beamer}\n"
-                       "[DEFAULT-PACKAGES]"
-                       "[PACKAGES]"
-                       "[EXTRA]\n")
-              ("\\section{%s}" . "\\section*{%s}")
-              ("\\subsection{%s}" . "\\subsection*{%s}")
-              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
-
-(add-to-list 'org-latex-classes
-   '("cs556"
-      "\\documentclass[review]{siamart171218}
-\\usepackage[utf8]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage{amsfonts}
-\\usepackage{graphicx}
-\\usepackage{algorithmic}
-\\usepackage{amsopn}
-\\usepackage{listings}
-\\usepackage{booktabs}
-\\usepackage{hyperref}
-\\usepackage{amssymb}
-\\usepackage{amsmath}"
-      ("\\section{%s}" . "\\section*{%s}")
-      ("\\subsection{%s}" . "\\subsection*{%s}")
-      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-      ("\\paragraph{%s}" . "\\paragraph*{%s}")
-      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-
-;; org-ref options
-(setq org-ref-bibliography-notes "~/Dropbox/orgfiles/bibliography/notes.org"
-      org-ref-pdf-directory "~/Dropbox/orgfiles/bibliography/bibtex-pdfs/")
-
 
 ;; Evil Mode options
 (require 'evil)
 (evil-mode 1)
+
+;; ====================================
+;; Development Setup
+;; ====================================
+;; Enable elpy
+(setq elpy-rpc-python-command "/usr/bin/python3")
+(add-hook 'elpy-mode-hook (lambda () (highlight-indentation-mode -1)))
+(elpy-enable)
+
+;; Enable Flycheck
+(when (require 'flycheck nil t)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+(setq flycheck-python-flake8-executable "/usr/bin/flake8")
+(setq flycheck-mode t)
+
+;; Show column numbers
+(setq column-number-mode t)
+
+;; tramp config
+(setq tramp-default-method "ssh")
