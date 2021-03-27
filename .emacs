@@ -41,9 +41,10 @@
 
 
 ;; Hard word wrapping
+(setq column-number-mode t)
 (global-visual-line-mode t)
-(add-hook 'text-mode-hook 'turn-on-auto-fill)
-(add-hook 'text-mode-hook '(lambda() (set-fill-column 85))) ;; word wrap column=85
+(add-hook 'prog-mode-hook '(lambda() (set-fill-column 85))) ;; word wrap column=85
+(add-hook 'prog-mode-hook 'turn-on-auto-fill)
 
 ;; Spell Check
 (dolist (hook '(text-mode-hook))
@@ -67,11 +68,14 @@
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   (add-hook 'elpy-mode-hook 'flycheck-mode))
 
+(setq-default flycheck-disabled-checkers '(python-mypy))
+(setq python-shell-interpreter "python3"
+      python-shell-interpreter-args "-i")
 (setq flycheck-python-flake8-executable "/usr/bin/flake8")
 (setq flycheck-mode t)
 
-;; Show column numbers
-(setq column-number-mode t)
-
 ;; tramp config
 (setq tramp-default-method "ssh")
+
+
+;;;;;;; End of user's init.el
